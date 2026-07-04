@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
     const prompt = buildPrompt(occasionTag ?? null)
 
     const geminiPromise = ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.1-flash-lite',
       contents: [
         {
           role: 'user',
@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
     } catch (parseErr) {
       console.warn('[analyze] First parse attempt failed, retrying:', parseErr)
       const retryPromise = ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.1-flash-lite',
         contents: [
           {
             role: 'user',
