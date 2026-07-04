@@ -79,48 +79,26 @@ export default async function Navbar() {
                 History
               </Link>
 
-              {/* User email chip */}
-              <div
+              {/* User avatar */}
+              <span
+                title={user.email}
                 style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  background: '#333333',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.5rem',
-                  padding: '0.25rem 0.75rem 0.25rem 0.25rem',
-                  borderRadius: 100,
+                  justifyContent: 'center',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  color: '#fff',
+                  flexShrink: 0,
                   border: '1px solid var(--border-subtle)',
-                  background: 'var(--bg-card)',
                 }}
               >
-                <span
-                  style={{
-                    width: 26,
-                    height: 26,
-                    borderRadius: '50%',
-                    background: '#333333',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '0.7rem',
-                    fontWeight: 700,
-                    color: '#fff',
-                    flexShrink: 0,
-                  }}
-                >
-                  {user.email?.[0]?.toUpperCase() ?? '?'}
-                </span>
-                <span
-                  style={{
-                    fontSize: '0.8125rem',
-                    color: 'var(--text-secondary)',
-                    maxWidth: 140,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {user.email}
-                </span>
-              </div>
+                {user.email?.[0]?.toUpperCase() ?? '?'}
+              </span>
 
               <LogoutButton />
             </>
