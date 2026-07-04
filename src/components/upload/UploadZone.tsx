@@ -9,7 +9,8 @@ interface UploadZoneProps {
 }
 
 export default function UploadZone({ onFileSelect, previewUrl, disabled }: UploadZoneProps) {
-  const inputRef = useRef<HTMLInputElement>(null)
+  const galleryInputRef = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
   const [isDragOver, setIsDragOver] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [shake, setShake] = useState(false)
@@ -25,7 +26,7 @@ export default function UploadZone({ onFileSelect, previewUrl, disabled }: Uploa
   const handleFile = useCallback(
     (file: File) => {
       setErrorMsg(null)
-      
+
       if (!file.type.startsWith('image/')) {
         setErrorMsg('Please upload a valid image file.')
         setShake(true)
@@ -67,16 +68,8 @@ export default function UploadZone({ onFileSelect, previewUrl, disabled }: Uploa
 
   return (
     <div
-      role="button"
-      tabIndex={disabled ? -1 : 0}
-      aria-label="Upload outfit photo — click or drag and drop"
       id="upload-zone"
       className={shake ? 'animate-shake' : ''}
-      onClick={() => !disabled && inputRef.current?.click()}
-      onKeyDown={e => {
-        if ((e.key === 'Enter' || e.key === ' ') && !disabled)
-          inputRef.current?.click()
-      }}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
@@ -96,7 +89,7 @@ export default function UploadZone({ onFileSelect, previewUrl, disabled }: Uploa
           : previewUrl
           ? 'var(--bg-card)'
           : 'rgba(255,255,255,0.02)',
-        cursor: disabled ? 'default' : 'pointer',
+        cursor: 'default',
         overflow: 'hidden',
         transition: 'border-color 0.25s, background 0.25s, box-shadow 0.25s',
         boxShadow: isDragOver
@@ -107,11 +100,22 @@ export default function UploadZone({ onFileSelect, previewUrl, disabled }: Uploa
         justifyContent: 'center',
       }}
     >
-      {/* Hidden file input */}
+      {/* Gallery / file picker — no capture attribute, opens normal photo picker */}
       <input
-        ref={inputRef}
+        ref={galleryInputRef}
         type="file"
-        id="file-input"
+        id="gallery-input"
+        accept="image/*"
+        style={{ display: 'none' }}
+        onChange={onInputChange}
+        disabled={disabled}
+      />
+
+      {/* Camera — capture attribute forces the device camera to open directly */}
+      <input
+        ref={cameraInputRef}
+        type="file"
+        id="camera-input"
         accept="image/*"
         capture="environment"
         style={{ display: 'none' }}
@@ -135,39 +139,52 @@ export default function UploadZone({ onFileSelect, previewUrl, disabled }: Uploa
               display: 'block',
             }}
           />
-          {/* Dark overlay with swap hint */}
+          {/* Dark overlay with swap actions */}
           {!disabled && (
             <div
               style={{
                 position: 'absolute',
                 inset: 0,
-                background: 'rgba(8,8,16,0.45)',
+                background: 'rgba(8,8,16,0.55)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
+                gap: '0.625rem',
                 opacity: 0,
                 transition: 'opacity 0.2s',
               }}
               className="upload-zone-overlay"
             >
-              <span
-                style={{
-                  color: '#fff',
-                  fontWeight: 600,
-                  fontSize: '0.875rem',
-                  letterSpacing: '0.04em',
-                  textTransform: 'uppercase',
-                  borderBottom: '1px solid rgba(255,255,255,0.5)',
-                  paddingBottom: '2px',
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  galleryInputRef.current?.click()
                 }}
+                className="btn-secondary"
+                style={{ padding: '0.625rem 1.125rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8125rem' }}
               >
-                Change photo
-              </span>
+                Choose from Library
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  cameraInputRef.current?.click()
+                }}
+                className="btn-secondary"
+                style={{ padding: '0.625rem 1.125rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8125rem' }}
+              >
+                Take Photo
+              </button>
             </div>
           )}
           <style>{`
             #upload-zone:hover .upload-zone-overlay { opacity: 1 !important; }
+            @media (hover: none) {
+              #upload-zone .upload-zone-overlay { opacity: 1; background: rgba(8,8,16,0.7); }
+            }
           `}</style>
         </>
       ) : (
@@ -178,10 +195,8 @@ export default function UploadZone({ onFileSelect, previewUrl, disabled }: Uploa
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '0.875rem',
+            gap: '1.25rem',
             padding: '2rem',
-            pointerEvents: 'none',
-            userSelect: 'none',
           }}
         >
           {/* Upload icon */}
@@ -199,17 +214,18 @@ export default function UploadZone({ onFileSelect, previewUrl, disabled }: Uploa
               justifyContent: 'center',
               transition: 'background 0.25s, border-color 0.25s',
               borderColor: isDragOver ? 'rgba(255,255,255,0.5)' : undefined,
+              pointerEvents: 'none',
             }}
           >
             <UploadIcon isDragOver={isDragOver} />
           </div>
 
-          <div style={{ textAlign: 'center' }}>
+          <div style={{ textAlign: 'center', pointerEvents: 'none' }}>
             <p
               style={{
                 fontWeight: 600,
                 color: errorMsg
-                  ? '#f87171' // Error color
+                  ? '#f87171'
                   : isDragOver
                   ? 'var(--text-accent)'
                   : 'var(--text-primary)',
@@ -222,10 +238,7 @@ export default function UploadZone({ onFileSelect, previewUrl, disabled }: Uploa
             </p>
             {!errorMsg && (
               <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-                Drag & drop or{' '}
-                <span style={{ color: '#ffffff', fontWeight: 500 }}>
-                  tap to browse
-                </span>
+                Drag & drop, or choose an option below
               </p>
             )}
             <p
@@ -237,6 +250,33 @@ export default function UploadZone({ onFileSelect, previewUrl, disabled }: Uploa
             >
               JPG, PNG, WEBP · Max 15MB
             </p>
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.625rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={(e) => {
+                e.stopPropagation()
+                galleryInputRef.current?.click()
+              }}
+              className="btn-secondary"
+              style={{ padding: '0.625rem 1.125rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8125rem' }}
+            >
+              Choose from Library
+            </button>
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={(e) => {
+                e.stopPropagation()
+                cameraInputRef.current?.click()
+              }}
+              className="btn-secondary"
+              style={{ padding: '0.625rem 1.125rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8125rem' }}
+            >
+              Take Photo
+            </button>
           </div>
         </div>
       )}
