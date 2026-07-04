@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
 
     const width = 1080
     const height = format === 'story' ? 1920 : 1350
-    const panelHeight = format === 'story' ? 460 : 400
+    const panelHeight = format === 'story' ? 560 : 500
 
     const [playfairData, archivoData, archivoBoldData] = await Promise.all([
       fetch('https://cdn.jsdelivr.net/fontsource/fonts/playfair-display@latest/latin-700-normal.ttf').then((r) => r.arrayBuffer()),
@@ -77,37 +77,6 @@ export async function GET(req: NextRequest) {
                 objectPosition: 'center',
               }}
             />
-
-            {/* Top vignette just for wordmark legibility */}
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: 220,
-                display: 'flex',
-                background: 'linear-gradient(to bottom, rgba(0,0,0,0.7), transparent)',
-              }}
-            />
-
-            {/* Wordmark, text-only */}
-            <span
-              style={{
-                position: 'absolute',
-                top: 52,
-                left: 60,
-                display: 'flex',
-                fontFamily: '"Archivo"',
-                fontWeight: 700,
-                fontSize: 30,
-                color: '#ffffff',
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-              }}
-            >
-              FitCheck
-            </span>
           </div>
 
           {/* Solid black bottom panel — always legible regardless of photo brightness */}
@@ -116,21 +85,21 @@ export async function GET(req: NextRequest) {
               position: 'relative',
               display: 'flex',
               flexDirection: 'column',
-              justifyContent: 'center',
-              gap: 26,
+              justifyContent: 'flex-start',
+              gap: 24,
               width: '100%',
               height: panelHeight,
               backgroundColor: '#000000',
               borderTop: '1px solid rgba(255,255,255,0.14)',
-              padding: '0 60px',
+              padding: '44px 40px 0 40px',
             }}
           >
             {/* Score */}
             <div style={{ display: 'flex', alignItems: 'baseline', fontFamily: '"Playfair Display"' }}>
-              <span style={{ fontSize: 236, color: '#fff', lineHeight: 1, display: 'flex', letterSpacing: '-0.02em' }}>
+              <span style={{ fontSize: 200, color: '#fff', lineHeight: 1, display: 'flex', letterSpacing: '-0.02em' }}>
                 {score}
               </span>
-              <span style={{ fontSize: 50, color: 'rgba(255,255,255,0.5)', marginLeft: 14, display: 'flex' }}>
+              <span style={{ fontSize: 44, color: 'rgba(255,255,255,0.5)', marginLeft: 14, display: 'flex' }}>
                 /10
               </span>
             </div>
@@ -138,33 +107,35 @@ export async function GET(req: NextRequest) {
             {/* Hairline rule */}
             <div style={{ display: 'flex', height: 1, background: 'rgba(255,255,255,0.2)', width: '100%' }} />
 
-            {/* Occasion + ratings */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 22, flexWrap: 'wrap' }}>
-              <span
-                style={{
-                  fontFamily: '"Archivo"',
-                  fontWeight: 700,
-                  fontSize: 34,
-                  color: '#fff',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                }}
-              >
-                {occasion}
-              </span>
+            {/* Occasion — own row */}
+            <span
+              style={{
+                fontFamily: '"Archivo"',
+                fontWeight: 700,
+                fontSize: 50,
+                color: '#fff',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                display: 'flex',
+              }}
+            >
+              {occasion}
+            </span>
 
+            {/* Ratings — own row, below occasion */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 22, flexWrap: 'wrap' }}>
               {colorRating && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div
                     style={{
-                      width: 11,
-                      height: 11,
+                      width: 10,
+                      height: 10,
                       borderRadius: 99,
                       background: RATING_DOT[colorRating] ?? '#888',
                       display: 'flex',
                     }}
                   />
-                  <span style={{ fontFamily: '"Archivo"', fontSize: 28, color: 'rgba(255,255,255,0.7)' }}>
+                  <span style={{ fontFamily: '"Archivo"', fontSize: 44, color: 'rgba(255,255,255,0.7)' }}>
                     Color: {colorRating}
                   </span>
                 </div>
@@ -174,14 +145,14 @@ export async function GET(req: NextRequest) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div
                     style={{
-                      width: 11,
-                      height: 11,
+                      width: 10,
+                      height: 10,
                       borderRadius: 99,
                       background: RATING_DOT[occasionRating] ?? '#888',
                       display: 'flex',
                     }}
                   />
-                  <span style={{ fontFamily: '"Archivo"', fontSize: 28, color: 'rgba(255,255,255,0.7)' }}>
+                  <span style={{ fontFamily: '"Archivo"', fontSize: 44, color: 'rgba(255,255,255,0.7)' }}>
                     Fit: {occasionRating}
                   </span>
                 </div>
@@ -192,7 +163,7 @@ export async function GET(req: NextRequest) {
             <span
               style={{
                 fontFamily: '"Archivo"',
-                fontSize: 26,
+                fontSize: 40,
                 color: 'rgba(255,255,255,0.5)',
                 letterSpacing: '0.02em',
                 display: 'flex',
@@ -207,7 +178,7 @@ export async function GET(req: NextRequest) {
             style={{
               position: 'absolute',
               inset: 0,
-              border: '14px solid #000000',
+              border: '12px solid #000000',
               display: 'flex',
               pointerEvents: 'none',
             }}

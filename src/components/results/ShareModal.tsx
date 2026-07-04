@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 interface ShareModalProps {
   score: number
@@ -21,6 +22,15 @@ export default function ShareModal({
 }: ShareModalProps) {
   const [format, setFormat] = useState<'story' | 'post'>('story')
   const [copied, setCopied] = useState(false)
+
+  // Lock body scroll while the modal is open
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = originalOverflow
+    }
+  }, [])
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
   const occasionLabel = occasionTag ?? 'Outfit'
@@ -48,23 +58,12 @@ export default function ShareModal({
     }
   }
 
-  async function handleNativeShare() {
-    if (navigator.share) {
-      try {
-        await navigator.share({ text: caption, url: siteUrl })
-      } catch {
-        // user cancelled — no-op
-      }
-    } else {
-      handleCopyCaption()
-    }
-  }
-
-  return (
+  return createPortal(
     <div
       style={{
         position: 'fixed',
         inset: 0,
+        height: '100dvh',
         zIndex: 100,
         background: 'rgba(0,0,0,0.85)',
         backdropFilter: 'blur(10px)',
@@ -85,7 +84,7 @@ export default function ShareModal({
           display: 'flex',
           flexDirection: 'column',
           gap: '1.25rem',
-          maxHeight: '90vh',
+          maxHeight: '90dvh',
           overflowY: 'auto',
         }}
         onClick={(e) => e.stopPropagation()}
@@ -196,7 +195,7 @@ export default function ShareModal({
           <a
             href={imageUrl}
             download={`fitcheck-${format}.png`}
-            className="btn-secondary"
+            className="btn-primary"
             style={{
               flex: 1,
               textAlign: 'center',
@@ -208,15 +207,9 @@ export default function ShareModal({
           >
             Download
           </a>
-          <button
-            onClick={handleNativeShare}
-            className="btn-primary"
-            style={{ flex: 1, padding: '0.8125rem', borderRadius: 'var(--radius-sm)' }}
-          >
-            Share
-          </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
