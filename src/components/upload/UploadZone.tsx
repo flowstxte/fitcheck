@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState, useCallback, useEffect } from 'react'
+import WebcamCapture from './WebcamCapture'
 
 interface UploadZoneProps {
   onFileSelect: (file: File) => void
@@ -14,6 +15,11 @@ export default function UploadZone({ onFileSelect, previewUrl, disabled }: Uploa
   const [isDragOver, setIsDragOver] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [shake, setShake] = useState(false)
+  const [showWebcam, setShowWebcam] = useState(false)
+
+  const isMobile =
+    typeof navigator !== 'undefined' &&
+    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
 
   // Clear error after shake completes
   useEffect(() => {
@@ -82,13 +88,13 @@ export default function UploadZone({ onFileSelect, previewUrl, disabled }: Uploa
         border: isDragOver
           ? '2px solid rgba(255,255,255,0.8)'
           : previewUrl
-          ? '2px solid var(--border-mid)'
-          : '2px dashed var(--border-mid)',
+            ? '2px solid var(--border-mid)'
+            : '2px dashed var(--border-mid)',
         background: isDragOver
           ? 'rgba(255,255,255,0.05)'
           : previewUrl
-          ? 'var(--bg-card)'
-          : 'rgba(255,255,255,0.02)',
+            ? 'var(--bg-card)'
+            : 'rgba(255,255,255,0.02)',
         cursor: 'default',
         overflow: 'hidden',
         transition: 'border-color 0.25s, background 0.25s, box-shadow 0.25s',
@@ -171,7 +177,11 @@ export default function UploadZone({ onFileSelect, previewUrl, disabled }: Uploa
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation()
-                  cameraInputRef.current?.click()
+                  if (isMobile) {
+                    cameraInputRef.current?.click()
+                  } else {
+                    setShowWebcam(true)
+                  }
                 }}
                 className="btn-secondary"
                 style={{ padding: '0.625rem 1.125rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8125rem' }}
@@ -227,8 +237,8 @@ export default function UploadZone({ onFileSelect, previewUrl, disabled }: Uploa
                 color: errorMsg
                   ? '#f87171'
                   : isDragOver
-                  ? 'var(--text-accent)'
-                  : 'var(--text-primary)',
+                    ? 'var(--text-accent)'
+                    : 'var(--text-primary)',
                 fontSize: '1rem',
                 marginBottom: '0.25rem',
                 transition: 'color 0.25s',
@@ -270,7 +280,11 @@ export default function UploadZone({ onFileSelect, previewUrl, disabled }: Uploa
               disabled={disabled}
               onClick={(e) => {
                 e.stopPropagation()
-                cameraInputRef.current?.click()
+                if (isMobile) {
+                  cameraInputRef.current?.click()
+                } else {
+                  setShowWebcam(true)
+                }
               }}
               className="btn-secondary"
               style={{ padding: '0.625rem 1.125rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8125rem' }}
@@ -279,6 +293,16 @@ export default function UploadZone({ onFileSelect, previewUrl, disabled }: Uploa
             </button>
           </div>
         </div>
+      )}
+
+      {showWebcam && (
+        <WebcamCapture
+          onCapture={(file) => {
+            setShowWebcam(false)
+            handleFile(file)
+          }}
+          onClose={() => setShowWebcam(false)}
+        />
       )}
     </div>
   )
